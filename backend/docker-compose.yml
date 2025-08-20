@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: nest-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nest_users_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nest_users_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: nest-redis
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli PING || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: nest-app
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=nest_users_db
+      - RUN_MIGRATIONS=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http=require('http');http.get({host:'localhost',port:3000,path:'/health',timeout:2000},res=>{process.exit(res.statusCode===200?0:1)}).on('error',()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  init-db:
+    image: postgres:15
+    container_name: nest-init-db
+    restart: 'no'
+    depends_on:
+      - postgres
+    volumes:
+      - ./sql:/sql:ro
+    environment:
+      PGPASSWORD: postgres
+    command: /bin/sh -c "until pg_isready -h postgres -U postgres -d nest_users_db; do sleep 1; done; psql -h postgres -U postgres -d nest_users_db -f /sql/init_db.sql"
+
+volumes:
+  pgdata:
