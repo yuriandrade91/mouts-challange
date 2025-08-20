@@ -15,6 +15,12 @@ async function bootstrap() {
     transports: [new winston.transports.Console({ format: winston.format.simple() })],
   });
   const app = await NestFactory.create(AppModule, { logger });
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+    credentials: true,
+  });
   if (process.env.RUN_MIGRATIONS === 'true') {
     try {
       const ds = app.get(DataSource);
