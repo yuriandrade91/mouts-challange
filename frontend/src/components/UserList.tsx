@@ -179,7 +179,7 @@ const UserList: React.FC = () => {
       </div>
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+          <div className="bg-gray-700 rounded-lg shadow-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">{editUser ? 'Editar usuário' : 'Cadastrar usuário'}</h2>
             <form onSubmit={editUser ? handleUpdate : handleCreate} className="space-y-4">
               <input

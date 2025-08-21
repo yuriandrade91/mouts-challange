@@ -12,7 +12,7 @@ export default function HomePage() {
     }
   }, [router]);
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-500">
       <h1 className="text-2xl font-bold mb-6">Usuários</h1>
       <UserList />
     </main>
